@@ -1,8 +1,25 @@
-function NoteList({ notes,onDelete,onComplete }) {
+import { useNotes, useNotesDispatch } from "../context/NotesContext";
+
+function NoteList({ sortBy }) {
+  const notes = useNotes();
+  let sortedNotes = notes;
+
+  if (sortBy === "earliest")
+    sortedNotes = [...notes].sort(
+      (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+    ); //a-b => a>b ? 1 : -1
+  if (sortBy === "latest")
+    sortedNotes = [...notes].sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    ); //a-b => a>b ? -1 : 1
+  if (sortBy === "completed")
+    sortedNotes = [...notes].sort(
+      (a, b) => Number(b.completed) - Number(a.completed)
+    ); //a-b => a>b ? 1 : -1
   return (
     <div className="note-list">
-      {notes.map((note) => (
-        <NoteItem key={note.id} note={note} onDelete={onDelete} onComplete={onComplete}/>
+      {sortedNotes.map((note) => (
+        <NoteItem key={note.id} note={note} />
       ))}
     </div>
   );
@@ -10,8 +27,9 @@ function NoteList({ notes,onDelete,onComplete }) {
 
 export default NoteList;
 
-function NoteItem({ note,onDelete,onComplete }) {
+function NoteItem({ note }) {
   const options = { year: "numeric", month: "long", day: "numeric" };
+  const dispatch = useNotesDispatch();
   return (
     <div className={`note-item ${note.completed ? "completed" : ""}`}>
       <div className="note-item__header">
@@ -20,8 +38,21 @@ function NoteItem({ note,onDelete,onComplete }) {
           <p className="desc">{note.description}</p>
         </div>
         <div className="actions">
-          <button onClick={()=>onDelete(note.id)}>❌</button>
-          <input onChange={onComplete} type="checkbox" name={note.id} id={note.id} value={note.id}/>
+          <button
+            onClick={() => dispatch({ type: "deleteNote", payload: note.id })}
+          >
+            ❌
+          </button>
+          <input
+            onChange={(e) => {
+              const noteId = Number(e.target.value);
+              dispatch({ type: "completeNote", payload: noteId });
+            }}
+            type="checkbox"
+            name={note.id}
+            id={note.id}
+            value={note.id}
+          />
         </div>
       </div>
       <div className="note-item__footer">

@@ -1,12 +1,14 @@
 import { useState } from "react";
+import { useNotesDispatch } from "../context/NotesContext";
 
-function AddNewNote({onAddNote}) {
+function AddNewNote() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-   
+  const dispatch = useNotesDispatch();
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!title || !description) return null; 
+    if (!title || !description) return null;
     const newNote = {
       title,
       description,
@@ -16,7 +18,7 @@ function AddNewNote({onAddNote}) {
     };
     setTitle("");
     setDescription("");
-   onAddNote(newNote)
+    dispatch({ type: "addNotes", payload: newNote });
   };
   return (
     <div className="add-new-note">
